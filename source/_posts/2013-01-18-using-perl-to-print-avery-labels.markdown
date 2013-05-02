@@ -75,85 +75,133 @@ The BASH script basically asks the user what printer they want to print to,  set
 
 Here is the Perl script which does most of the heavy lifting.
 
-{% codeblock Make a secure connection via SSH lang:perl https://gist.github.com/jackl0phty/4247908/raw/e408e56504ec079bf7975e504a43bdaa37c720b3/Perl-Print-Avery-Labels %}
- #!/usr/bin/perl
-##################################################
-#This script is responsible for making a secure  #
-#connection via ssh to server1 and executing the #
-#commaned ls .                                   #
-#This script is also responsible for making a    #
-#a secure connection via ssh to server1 and then #
-#scp the file test.txt.                          #
-##################################################
+{% codeblock Print Avery Labels lang:perl https://gist.github.com/jackl0phty/4247908/raw/e408e56504ec079bf7975e504a43bdaa37c720b3/Perl-Print-Avery-Labels %}
+#!/usr/bin/perl -w
 
-#import required modules
+###############################################################################
+#This script will open a file containing a list of                            #
+##addresses, use the addresses to build a postscript file,                    #
+##and send that file to a printer.                                            #
+###############################################################################
+# Licensed under the Apache License, Version 2.0 (the "License"),             # 
+# For any questions regarding the license of this software, please refer to   #
+# the actual license at http://www.apache.org/licenses/LICENSE-2.0.txt.       #
+###############################################################################
+#                        DISCLAIMER OF WARRENTY                               #
+# BECAUSE THIS SOFTWARE IS LICENSED FREE OF CHARGE, THERE IS NO WARRANTY FOR  #
+# THE SOFTWARE, TO THE EXTENT PERMITTED BY APPLICABLE LAW. EXCEPT WHEN        #
+# OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES      #
+# PROVIDE THE SOFTWARE "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED #
+# OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF        #
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE ENTIRE RISK AS TO #
+# THE QUALITY AND PERFORMANCE OF THE SOFTWARE IS WITH YOU. SHOULD THE         #
+# SOFTWARE PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING,   #
+# REPAIR, OR CORRECTION. IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR     #
+# AGREED TO IN WRITING WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MAY  #
+# MODIFY AND/OR REDISTRIBUTE THE SOFTWARE AS PERMITTED BY THE ABOVE LICENCE,  #
+# BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY GENERAL, SPECIAL, INCIDENTAL,   #
+# OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR INABILITY TO USE THE     #
+# SOFTWARE (INCLUDING BUT NOT LIMITED TO LOSS OF DATA OR DATA BEING RENDERED  #
+# INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD PARTIESOR A FAILURE OF THE   #
+# SOFTWARE TO OPERATE WITH ANY OTHER SOFTWARE), EVEN IF SUCH HOLDER OR OTHER  #
+# PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.                  #
+###############################################################################
+
+# Import required modules
 use strict;
-use warnings;
-use Net::SCP qw(scp iscp);
-use Net::SSH qw(ssh);
-use Log::Dispatch::Syslog;
+use PostScript::MailLabels;
 
-#declare local variables
-my $scp;
-my $host = "server1.domain.com";
-my $user = "user1";
-my $remotedir = "/home/user1/";
-my $file = "test.txt";
-my $cmd = "/bin/ls";
+# Declare local variables
+my $labels;
+my @addresses;
+my $filename;
+my $filepath = '/home/user1/';
+my $date = `date +%m%d%y`;
 
-####################Log::Dispatch::Syslog#######################################
-# Define our pid for use in the log message
-my $pid = getppid();
-# Define our logfile object
-my $logfile = Log::Dispatch::Syslog->new( name => 'logfile',
-                                          min_level => 'info',
-                                          ident => "running_list_cmd[$pid]" );
-####################Log::Dispatch::Syslog#######################################
+# Get name of file from user
+print "Enter name of file you would like to process:  ";
+$filename = <>;
 
-######first connect to $host via Net::SSH and run /bin/ls###########
-$logfile->log( level => 'info', message => "Connecting to $host as $user and running /bin/ls ..." );
-ssh("$user\@$host", $cmd);
-$logfile->log( level => 'info', message => "ls completed successfully!" );
-######first connect to $host via Net::SSH and copy file $file###########
+# Inform user of progress
+print "Creating postscript file ...\n\n";
 
-#initialize Net::SCP object and send credentials
-$scp = Net::SCP->new($host);
+$labels = PostScript::MailLabels->new;
 
-#notify user we're logging into $host
-print "Logging into $host ...\n";
+# Create file handle for reading
+open(NEWADDRESSES, "$filepath$filename") or die("Unable to open file: $!");
 
-#write "connected to $host" to $file
-$logfile->log( level => 'info', message => "Connected to $host successfully." );
+# Read file one line at a time
+while () {
 
-#log into $host as $user
-$scp->login($user) or die $scp->{errstr};
+    #delete first line containing name;street1;street2;citystzip$
+    next if /^name;/;
 
-#write "connected to $host" to $file
-$logfile->log( level => 'info', message => "Logged into $host successfully." );
+    $labels->labelsetup(
+        Avery       => $labels->averycode(5961),
+        PaperSize   => 'letter',
+        postnet     => 'no'
+    );
 
-#notify user of changing working directory to $remotedir
-print "Chaging working directory to $remotedir\n";
+    $labels->definelabel('clear');
 
-#change working directory to $remotedir
-$scp->cwd($remotedir) or die $scp->{errstr};
+    $labels->definelabel(0,'fname','lname');
+    $labels->definelabel(1,'street');
+    $labels->definelabel(2,'city','state','zip');
 
-#Write Changed working directory (CWD) to $remotedir
-$logfile->log( level => 'info', message => "CWD to $remotedir successfully." );
 
-#display file size of $file
-$scp->size($file) or die $scp->{errstr};
+    # Match lastname, firstname, and address.
+    my $pattern = '^(.+),\s+(.+);(.+);(.*);(.+),\s+(\w{2})\s+(\d{5}|\d{5}-\d{4})';
 
-#notify user scp of $file has started
-print "SCPing $remotedir$file from $host ...\n";
+    $_ =~ /$pattern/;
 
-#scp $file from $host
-$scp->get($file) or die $scp->{errstr};
+    my $lname = $1;
+    my $fname = $2;
+    my $address1 = $3;
+    my $address2 = $4;
+    my $city = $5;
+    my $state = $6;
+    my $zip = $7;
 
-#notify user scp of $file from $host was successful
-print "$remotedir$file copied from $host successfully!\n";
+    my @record;
+
+    push @record, $fname;
+    push @record, $lname;
+    if ( $address2 !~ /^$/ ) {
+        push @record, "$address1, $address2";
+    } else {
+        push @record, $address1;
+    }
+    push @record, "$city,";
+    push @record, $state;
+    push @record, $zip;
+
+    # Uncomment line below to debug.
+    #print $labels->makelabels( $addresses );
+    push (@addresses, \@record);
+
+# Close while loop
+}
+
+# Open file handle for writing
+open(PRINTADDRESSES, ">$filepath$date") or die("Unable to write file: $!");
+
+# Write postscript file
+print PRINTADDRESSES $labels->makelabels( \@addresses );
+
+# Close filehandle
+close(PRINTADDRESSES);
+
+# Close filehandle
+close(NEWADDRESSES);
+
+# Notify user of file completion and get printer name
+print "Postscript file named $date has been created successfully.\n";
+
+# Exit cleanly
+exit 0;
 {% endcodeblock %}
 
-The Perl script basically asks the user what's the name of the file they want to print, reads in the file (; delimited in this case), outputs a postscript file.
+The Perl script basically asks the user what's the name of the file they want to print, reads in the file (; delimited in this case), & outputs a postscript file.
 
 Obviously you will have to make some changes in order to get these scripts to work in YOUR environment!
 
