@@ -74,7 +74,7 @@ server1:~# init 6
 {% endcodeblock %}
 
 After logging back into your Debian box let's check for package issues like we did before.
-{% codeblock Fix any packages this two commands output %}
+{% codeblock Fix any packages these two commands output %}
 server1:~# dpkg --audit 
 server1:~# dpkg --get-selections | grep hold
 {% endcodeblock %}
@@ -86,12 +86,12 @@ server1:~# apt-get dist-upgrade
 {% endcodeblock %}
 
 Finally check what Debian version you're currently on.
-{% codeblock Reboot into your new Debian distribution Wheezy %}
+{% codeblock Check your Debian version %}
 server1:~# cat /etc/debian_version 
 7.0
 server1:~# 
 {% endcodeblock %}
 
-If the output of the above command is 7.0 you are now running Debian Wheezy.
+If the output of the above command is 7.0 you are now running Debian Wheezy!
 
 Now go have a beer or three!
