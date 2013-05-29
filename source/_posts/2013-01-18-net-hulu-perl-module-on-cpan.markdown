@@ -15,7 +15,7 @@ perl -MCPAN -e 'install Net::Hulu'
 Net::Hulu provides methods to download all XML-formatted RSS feeds provided by hulu.com and return a data structure to the user containing the Data from the RSS feeds.
 
 The following methods will download RSS feeds from hulu.com to directory where Hulu.pm is installed.
-
+<!-- more -->
 Method download_recent_videos_xml will download RSS feed for recent videos.
 
 Method download_recent_shows_xml will download RSS feed for recent shows.

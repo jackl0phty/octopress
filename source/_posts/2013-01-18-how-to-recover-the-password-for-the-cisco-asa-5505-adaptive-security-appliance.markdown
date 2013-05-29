@@ -7,7 +7,7 @@ comments: true
 categories: 
 ---
 This blog will discuss how to reset the password on Cisco's ASA 5505 Adaptive Security Appliance.  First I will assume you are using Cisco's gudie for recovering your password located at http://www.cisco.com/en/US/docs/security/asa/asa71/configuration/guide/trouble.pdf .  Start at page 7 entited "Performing password Recovery for the ASA 5500 Series Adaptive Security Appliance.
-
+<!-- more -->
 I won't copy what's in Cisco's guide but I'll add the following:
 
 1.  Below is what steps 4 - 8 actually look like on Cisco's ASA 5505:

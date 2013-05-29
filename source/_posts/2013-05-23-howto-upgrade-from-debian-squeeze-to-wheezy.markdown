@@ -16,7 +16,7 @@ apt-get autoclean
 {% codeblock Remove packages no longer needed %}
 apt-get autoremove
 {% endcodeblock %}
-
+<!-- more -->
 Now let's search for packages that have been installed only partially and fix them.
 {% codeblock Fix any packages in the output of the dpkg cmd below %}
 dpkg --audit

@@ -12,7 +12,7 @@ First download and install my bind-chroot cookbook from within your main chef-re
 {% codeblock Install my bind-chroot cookbook from the community site %}
 skywalker@laptop ~/chef-repo/ $ knife cookbook site install bind-chroot
 {% endcodeblock %}
-
+<!-- more -->
 Include the bind-chroot::chroot recipe in your node's runlist like so:
 {% codeblock Add bind-chroot::chroot recipe to your node's runlist %}
 {

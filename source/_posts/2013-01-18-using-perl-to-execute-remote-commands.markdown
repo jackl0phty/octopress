@@ -8,6 +8,7 @@ categories:
 This blog will discuss how to both securely execute a command on a remote server and securely copy a file from that server.
 
 Here is the Perl script that can securely execute commands on as well as securely copy files from a server.
+<!-- more -->
 {% codeblock Scp Files With Perl lang:perl https://raw.github.com/jackl0phty/misc-scripts/6570cb69fba6e0b0bc71a1fc433a13ede21788c9/scpfile.pl Download From Github %}
 #!/usr/bin/perl
 ##################################################

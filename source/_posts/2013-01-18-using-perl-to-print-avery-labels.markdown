@@ -11,6 +11,7 @@ This blog will discuss how to use the Perl module PostScript::MailLabels to prin
 The basic design is to have your user(s) run the following BASH shell script, which will then call a Perl script that builds a postscript file, then the BASH script will send the postscript file to the printer.
 
 Here is the shell script your user(s) will run.
+<!-- more -->
 {% codeblock Set Linux Environment to Print Avery Labels lang:bash https://gist.github.com/jackl0phty/4247878/raw/be2223e3cf561c4db010a30fc95de558291df5fa/perl-avery-labels %}
 #!/bin/bash
  
