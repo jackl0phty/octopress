@@ -2,6 +2,14 @@ GEM
   remote: http://rubygems.org/
   specs:
     RedCloth (4.2.9)
+    capistrano (3.0.1)
+      i18n
+      rake (>= 10.0.0)
+      sshkit (>= 0.0.23)
+    capistrano-bundler (1.0.0)
+      capistrano (>= 3.0.0.pre)
+    capistrano-ext (1.2.1)
+      capistrano (>= 1.0.0)
     chunky_png (1.2.5)
     classifier (1.3.3)
       fast-stemmer (>= 1.0.0)
@@ -13,6 +21,7 @@ GEM
     fast-stemmer (1.0.1)
     fssm (0.2.9)
     haml (3.1.7)
+    i18n (0.6.5)
     jekyll (0.12.0)
       classifier (~> 1.3)
       directory_watcher (~> 1.1)
@@ -24,6 +33,9 @@ GEM
     liquid (2.3.0)
     maruku (0.6.1)
       syntax (>= 1.0.0)
+    net-scp (1.1.2)
+      net-ssh (>= 2.6.5)
+    net-ssh (2.7.0)
     posix-spawn (0.3.6)
     pygments.rb (0.3.4)
       posix-spawn (~> 0.3.6)
@@ -31,7 +43,7 @@ GEM
     rack (1.4.1)
     rack-protection (1.3.2)
       rack
-    rake (0.9.2.2)
+    rake (10.0.4)
     rb-fsevent (0.9.1)
     rdiscount (1.6.8)
     rubypants (0.2.0)
@@ -40,9 +52,16 @@ GEM
       rack (~> 1.3, >= 1.3.6)
       rack-protection (~> 1.2)
       tilt (~> 1.3, >= 1.3.3)
+    sshkit (1.1.0)
+      net-scp
+      net-ssh
+      term-ansicolor
     stringex (1.4.0)
     syntax (1.0.0)
+    term-ansicolor (1.2.2)
+      tins (~> 0.8)
     tilt (1.3.3)
+    tins (0.13.1)
     yajl-ruby (1.1.0)
 
 PLATFORMS
@@ -50,13 +69,16 @@ PLATFORMS
 
 DEPENDENCIES
   RedCloth (~> 4.2.9)
+  capistrano (~> 3.0.1)
+  capistrano-bundler
+  capistrano-ext
   compass (~> 0.12.2)
   haml (~> 3.1.7)
   jekyll (~> 0.12)
   liquid (~> 2.3.0)
   pygments.rb (~> 0.3.4)
   rack (~> 1.4.1)
-  rake (~> 0.9)
+  rake (~> 10.0.0)
   rb-fsevent (~> 0.9)
   rdiscount (~> 1.6.8)
   rubypants (~> 0.2.0)
