@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: 
+
+Sitemap: http://jackl0phty.org/blog/sitemap.xml 

@@ -1,0 +1,408 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Net::Hulu Perl Module on CPAN - Jackl0phty's Blog</title>
+  <meta name="author" content="Gerald L. Hevener Jr., M.S.">
+
+  
+  <meta name="description" content="I wrote a Perl CPAN module Net::Hulu a while back. You can install it like so: perl -MCPAN -e 'install Net::Hulu' Net::Hulu provides methods to &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://jackl0phty.org/blog/blog/2013/01/18/net-hulu-perl-module-on-cpan/">
+  <link href="/blog/favicon.png" rel="icon">
+  <link href="/blog/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/blog/javascripts/modernizr-2.0.js"></script>
+  <script src="/blog/javascripts/ender.js"></script>
+  <script src="/blog/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/blog/atom.xml" rel="alternate" title="Jackl0phty's Blog" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-39906289-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/blog/">Jackl0phty's Blog</a></h1>
+  
+    <h2>Rants, tirades, and sporadic outbursts from 'the Linux guy'.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/blog/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:jackl0phty.org/blog" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="http://jackl0phty.org">Home</a></li>
+  <li><a href="/blog/">Blog</a></li>
+  <li><a href="/blog/blog/archives">Archives</a></li>
+  <li><a href="http://search.cpan.org/~jlophty/">CPAN</a></li>
+  <li><a href="https://github.com/jackl0phty">Github</a></li>
+  <li><a href="http://community.opscode.com/users/jackl0phty">Chef</a></li>
+  <li><a href="http://www.linkedin.com/in/geraldhevener">LinkedIn</a></li>
+  <li><a href="https://plus.google.com/115179562165561540174">Google+</a></li>
+  <li><a href="http://www.youtube.com/user/jackl0phty">YouTube</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Net::Hulu Perl Module on CPAN</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-01-18T21:48:00-05:00" pubdate data-updated="true">Jan 18<span>th</span>, 2013</time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>I wrote a Perl CPAN module Net::Hulu a while back.  You can install it like so:</p>
+
+<pre><code>
+perl -MCPAN -e 'install Net::Hulu' 
+</code></pre>
+
+
+<p>Net::Hulu provides methods to download all XML-formatted RSS feeds provided by hulu.com and return a data structure to the user containing the Data from the RSS feeds.</p>
+
+<p>The following methods will download RSS feeds from hulu.com to directory where Hulu.pm is installed.</p>
+
+<!-- more -->
+
+
+<p>Method download_recent_videos_xml will download RSS feed for recent videos.</p>
+
+<p>Method download_recent_shows_xml will download RSS feed for recent shows.</p>
+
+<p>Method download_recent_movies_xml will download RSS feed for recent movies.</p>
+
+<p>Method download_highest_rated_videos_xml will download RSS feed for highest rated videos.</p>
+
+<p>Method download_popular_videos_today_xml will download RSS feed for today&#8217;s popular videos.</p>
+
+<p>Method download_popular_videos_this_week_xml will download RSS feed for this week&#8217;s popular videos.</p>
+
+<p>Method download_popular_videos_all_time_xml will download RSS feed for most popular videos of all time.</p>
+
+<p>Method download_soon_to_expire_videos_xml will download RSS feed for soon to expire videos.</p>
+
+<p>Method download_recent_blog_postings_xml will download RSS feed for recent blog postings to hulu.com.</p>
+
+<p>The following methods will process all RSS feeds provided by hulu.com.</p>
+
+<p>Method get_recent_videos returns a list of recently added videos to the user.</p>
+
+<p>Method get_recent_shows returns a list of recently added shows to the user.</p>
+
+<p>Method get_recent_movies returns a list of recently added movies to the user.</p>
+
+<p>Method get_highest_rated_videos returns a list of highest rated videos to the user.</p>
+
+<p>Method get_popular_videos_today returns a list of most popular videos today to the user.</p>
+
+<p>Method get_popular_videos_this_week returns a list of most popular videos this week to the user.</p>
+
+<p>Nethod get_popular_videos_all_time returns a list of most popular videos of all time to the user.</p>
+
+<p>Method get_soon_to_expire_videos returns a list of soon to expire videos to the user.</p>
+
+<p>Method get_recent_blog_postings returns recent blog postings for hulu.com to the user.</p>
+
+<p>For detailed information on the Perl Module Net::Hulu, please visit the project&#8217;s home page on CPAN at http://search.cpan.org/~jlophty/Net-Hulu-0.02/lib/Net/Hulu.pm.</p>
+
+<pre><code>
+h2xs -b 5.6.0 -XA -n Net::Hulu
+</code></pre>
+
+
+<p>This will remove all autoload and XS portions of the module, adding backwards compatibility with Perl versions >= 5.6.0, and making it a &#8216;Pure Perl&#8217; implementation.</p>
+
+<p>Disclaimer:  This blog entry comes with NO expressed warranty, guarantee, support, or maintenance of any kind.  Use at your own risk!</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Gerald L. Hevener Jr., M.S.</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-01-18T21:48:00-05:00" pubdate data-updated="true">Jan 18<span>th</span>, 2013</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://jackl0phty.org/blog/blog/2013/01/18/net-hulu-perl-module-on-cpan/" data-via="jackl0phty" data-counturl="http://jackl0phty.org/blog/blog/2013/01/18/net-hulu-perl-module-on-cpan/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+      
+        <a class="basic-alignment right" href="/blog/blog/2013/01/18/using-perl-to-execute-remote-commands/" title="Next Post: Using Perl to Execute Remote Commands">Using Perl to Execute Remote Commands &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/blog/2013/05/24/deploy-a-caching-bind9-chrooted-dns-server-with-opscode-chef/">Deploy a caching Bind9 CHROOTed DNS server with Opscode Chef</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/blog/2013/05/23/howto-upgrade-from-debian-squeeze-to-wheezy/">Howto: Upgrade from Debian squeeze to wheezy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/blog/2013/01/18/using-perl-to-print-avery-labels/">Using Perl to Print Avery Labels</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/blog/2013/01/18/how-to-recover-the-password-for-the-cisco-asa-5505-adaptive-security-appliance/">How to Recover the Password for the Cisco ASA 5505 Adaptive Security Appliance</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/blog/2013/01/18/using-perl-to-execute-remote-commands/">Using Perl to Execute Remote Commands</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/jackl0phty">@jackl0phty</a> on GitHub
+  
+  <br /> <br />
+  <a href="https://github.com/jackl0phty/opschef-cookbook-avahi-daemon">opschef-cookbook-avahi-daemon</a>
+  <br />
+  <a href="https://github.com/jackl0phty/opschef-cookbook-unix-shells">opschef-cookbook-unix-shells</a>
+  <br />
+  <a href="https://github.com/jackl0phty/opschef-cookbook-sptoolkit">opschef-cookbook-sptoolkit</a>
+  <br />
+  <a href="https://github.com/jackl0phty/opschef-cookbook-linux-gamer">opschef-cookbook-linux-gamer</a>
+  <br />
+  <a href="https://github.com/jackl0phty/opschef-cookbook-linux-dev-env">opschef-cookbook-linux-dev-env</a>
+  <br />
+  <a href="https://github.com/jackl0phty/opschef-cookbook-fog">opschef-cookbook-fog</a>
+  <br />
+  <a href="https://github.com/jackl0phty/opschef-cookbook-bind-chroot">opschef-cookbook-bind-chroot</a>
+  <br />
+  <a href="https://github.com/jackl0phty/opschef-cookbook-pvpgn">opschef-cookbook-pvpgn</a>
+  <br />
+  <a href="https://github.com/jackl0phty/opschef-cookbook-openvas">opschef-cookbook-openvas</a>
+  <br />
+  <a href="https://github.com/jackl0phty/opschef-cookbook-ldapknife">opschef-cookbook-ldapknife</a>
+  <br />
+  <a href="https://github.com/jackl0phty/opschef-cookbook-rackspaceknife">opschef-cookbook-rackspaceknife</a>
+  <br />
+  <a href="https://github.com/jackl0phty/snmp-rndc-stat">snmp-rndc-stats</a>
+
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'jackl0phty',
+            count: 15,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/blog/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating...</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("jackl0phty", 5, true);
+    });
+  </script>
+  <script src="/blog/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/jackl0phty" class="twitter-follow-button" data-show-count="true">Follow @jackl0phty</a>
+  
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p><center>
+  Copyright &copy; 2013 - Gerald L. Hevener Jr., M.S. Jackl0phty LLC
+  <br>
+  <!-- <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span> -->
+  Powered by <a href="http://octopress.org">Octopress</a>, <a href="http://kernel.org">Linux</a>, <a href="http://debian.org">Debian</a>, <a href="http://www.ruby-lang.org/en/">Ruby</a>, <a href="http://www.mongodb.org/">MongoDB</a>, <a href="http://www.perl.org">Perl</a>, <a href="http://www.rackspace.com/cloud/files">Rackspace Cloud Files</a>
+  </center></p>  
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'jackl0phty';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://jackl0phty.org/blog/blog/2013/01/18/net-hulu-perl-module-on-cpan/';
+        var disqus_url = 'http://jackl0phty.org/blog/blog/2013/01/18/net-hulu-perl-module-on-cpan/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

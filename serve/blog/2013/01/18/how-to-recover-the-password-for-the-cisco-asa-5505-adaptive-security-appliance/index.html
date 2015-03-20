@@ -1,0 +1,565 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>How to Recover the Password for the Cisco ASA 5505 Adaptive Security Appliance - Jackl0phty's Blog</title>
+  <meta name="author" content="Gerald L. Hevener Jr., M.S.">
+
+  
+  <meta name="description" content="This blog will discuss how to reset the password on Cisco&#8217;s ASA 5505 Adaptive Security Appliance. First I will assume you are using Cisco&#8217 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://jackl0phty.org/blog/blog/2013/01/18/how-to-recover-the-password-for-the-cisco-asa-5505-adaptive-security-appliance/">
+  <link href="/blog/favicon.png" rel="icon">
+  <link href="/blog/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/blog/javascripts/modernizr-2.0.js"></script>
+  <script src="/blog/javascripts/ender.js"></script>
+  <script src="/blog/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/blog/atom.xml" rel="alternate" title="Jackl0phty's Blog" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-39906289-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/blog/">Jackl0phty's Blog</a></h1>
+  
+    <h2>Rants, tirades, and sporadic outbursts from 'the Linux guy'.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/blog/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:jackl0phty.org/blog" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="http://jackl0phty.org">Home</a></li>
+  <li><a href="/blog/">Blog</a></li>
+  <li><a href="/blog/blog/archives">Archives</a></li>
+  <li><a href="http://search.cpan.org/~jlophty/">CPAN</a></li>
+  <li><a href="https://github.com/jackl0phty">Github</a></li>
+  <li><a href="http://community.opscode.com/users/jackl0phty">Chef</a></li>
+  <li><a href="http://www.linkedin.com/in/geraldhevener">LinkedIn</a></li>
+  <li><a href="https://plus.google.com/115179562165561540174">Google+</a></li>
+  <li><a href="http://www.youtube.com/user/jackl0phty">YouTube</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">How to Recover the Password for the Cisco ASA 5505 Adaptive Security Appliance</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-01-18T23:13:00-05:00" pubdate data-updated="true">Jan 18<span>th</span>, 2013</time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>This blog will discuss how to reset the password on Cisco&#8217;s ASA 5505 Adaptive Security Appliance.  First I will assume you are using Cisco&#8217;s gudie for recovering your password located at http://www.cisco.com/en/US/docs/security/asa/asa71/configuration/guide/trouble.pdf .  Start at page 7 entited &#8220;Performing password Recovery for the ASA 5500 Series Adaptive Security Appliance.</p>
+
+<!-- more -->
+
+
+<p>I won&#8217;t copy what&#8217;s in Cisco&#8217;s guide but I&#8217;ll add the following:</p>
+
+<ol>
+<li>Below is what steps 4 - 8 actually look like on Cisco&#8217;s ASA 5505:</li>
+</ol>
+
+
+<figure class='code'><figcaption><span>Output from Cisco ASA 5505 </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+<span class='line-number'>89</span>
+<span class='line-number'>90</span>
+<span class='line-number'>91</span>
+<span class='line-number'>92</span>
+<span class='line-number'>93</span>
+<span class='line-number'>94</span>
+<span class='line-number'>95</span>
+<span class='line-number'>96</span>
+<span class='line-number'>97</span>
+<span class='line-number'>98</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>rommon #1> confreg
+</span><span class='line'>Current Configuration Register: 0x00000000
+</span><span class='line'>Configuration Summary:
+</span><span class='line'>boot ROMMON
+</span><span class='line'>Do you wish to change this configuration? y/n [n]: y
+</span><span class='line'>enable boot to ROMMON prompt? y/n [n]:
+</span><span class='line'>enable TFTP netboot? y/n [n]:
+</span><span class='line'>enable Flash boot? y/n [n]:
+</span><span class='line'>select specific Flash image index? y/n [n]:
+</span><span class='line'>disable system configuration? y/n [n]: y
+</span><span class='line'>go to ROMMON prompt if netboot fails? y/n [n]:
+</span><span class='line'>enable passing NVRAM file specs in auto-boot mode? y/n [n]:
+</span><span class='line'>disable display of BREAK or ESC key prompt during auto-boot? y/n [n]:
+</span><span class='line'>Current Configuration Register: 0x00000040
+</span><span class='line'>Configuration Summary:
+</span><span class='line'>boot ROMMON
+</span><span class='line'>ignore system configuration
+</span><span class='line'>Update Config Register (0x40) in NVRAM...
+</span><span class='line'>rommon #2>
+</span><span class='line'>Next reload the ASA by typing boot.
+</span><span class='line'>rommon #2> boot
+</span><span class='line'>Launching BootLoader...
+</span><span class='line'>Default configuration file contains 1 entry.
+</span><span class='line'>Searching / for images to boot.
+</span><span class='line'>Loading /asa722-k8.bin... Booting...
+</span><span class='line'>###############################################################################################################################################################################################
+</span><span class='line'>256MB RAM
+</span><span class='line'>Total SSMs found: 0
+</span><span class='line'>Total NICs found: 10
+</span><span class='line'>88E6095 rev 2 Gigabit Ethernet @ index 09 MAC:
+</span><span class='line'>88E6095 rev 2 Ethernet @ index 08 MAC:
+</span><span class='line'>88E6095 rev 2 Ethernet @ index 07 MAC:
+</span><span class='line'>88E6095 rev 2 Ethernet @ index 06 MAC:
+</span><span class='line'>88E6095 rev 2 Ethernet @ index 05 MAC: 
+</span><span class='line'>88E6095 rev 2 Ethernet @ index 04 MAC: 
+</span><span class='line'>88E6095 rev 2 Ethernet @ index 03 MAC: 
+</span><span class='line'>88E6095 rev 2 Ethernet @ index 02 MAC: 
+</span><span class='line'>88E6095 rev 2 Ethernet @ index 01 MAC: 
+</span><span class='line'>y88acs06 rev16 Gigabit Ethernet @ index 00 MAC:
+</span><span class='line'>Licensed features for this platform:
+</span><span class='line'>Maximum Physical Interfaces : 8
+</span><span class='line'>VLANs : 3, DMZ Restricted
+</span><span class='line'>Inside Hosts : 10
+</span><span class='line'>Failover : Disabled
+</span><span class='line'>VPN-DES : Enabled
+</span><span class='line'>VPN-3DES-AES : Enabled
+</span><span class='line'>VPN Peers : 10
+</span><span class='line'>WebVPN Peers : 2
+</span><span class='line'>Dual ISPs : Disabled
+</span><span class='line'>VLAN Trunk Ports : 0
+</span><span class='line'>This platform has a Base license.
+</span><span class='line'>Encryption hardware device : Cisco ASA-5505 on-board accelerator (revision 0x0)
+</span><span class='line'>Boot microcode : #CNlite-MC-Boot-Cisco-1.2
+</span><span class='line'>SSL/IKE microcode: #CNlite-MC-IPSEC-Admin-3.03
+</span><span class='line'>IPSec microcode : #CNlite-MC-IPSECm-MAIN-2.04
+</span><span class='line'>--------------------------------------------------------------------------
+</span><span class='line'>. .
+</span><span class='line'>| |
+</span><span class='line'>||| |||
+</span><span class='line'>.|| ||. .|| ||.
+</span><span class='line'>.:||| | |||:..:||| | |||:.
+</span><span class='line'>C i s c o S y s t e m s
+</span><span class='line'>--------------------------------------------------------------------------
+</span><span class='line'>Cisco Adaptive Security Appliance Software Version )
+</span><span class='line'> 
+</span><span class='line'>****************************** Warning *******************************
+</span><span class='line'>This product contains cryptographic features and is
+</span><span class='line'>subject to United States and local country laws
+</span><span class='line'>governing, import, export, transfer, and use.
+</span><span class='line'>Delivery of Cisco cryptographic products does not
+</span><span class='line'>imply third-party authority to import, export,
+</span><span class='line'>distribute, or use encryption. Importers, exporters,
+</span><span class='line'>distributors and users are responsible for compliance
+</span><span class='line'>with U.S. and local country laws. By using this
+</span><span class='line'>product you agree to comply with applicable laws and
+</span><span class='line'>regulations. If you are unable to comply with U.S.
+</span><span class='line'>and local laws, return the enclosed items immediately.
+</span><span class='line'>A summary of U.S. laws governing Cisco cryptographic
+</span><span class='line'>products may be found at:
+</span><span class='line'>http://www.cisco.com/wwl/export/crypto/tool/stqrg.html
+</span><span class='line'>If you require further assistance please contact us by
+</span><span class='line'>sending email to export@cisco.com.
+</span><span class='line'>******************************* Warning *******************************
+</span><span class='line'>Copyright (c) 1996-2006 by Cisco Systems, Inc.
+</span><span class='line'>Restricted Rights Legend
+</span><span class='line'>Use, duplication, or disclosure by the Government is
+</span><span class='line'>subject to restrictions as set forth in subparagraph
+</span><span class='line'>(c) of the Commercial Computer Software - Restricted
+</span><span class='line'>Rights clause at FAR sec. 52.227-19 and subparagraph
+</span><span class='line'>(c) (1) (ii) of the Rights in Technical Data and Computer
+</span><span class='line'>Software clause at DFARS sec. 252.227-7013.
+</span><span class='line'>Cisco Systems, Inc.
+</span><span class='line'>170 West Tasman Drive
+</span><span class='line'>San Jose, California 95134-1706
+</span><span class='line'>Ignoring startup configuration as instructed by configuration register.
+</span><span class='line'>INFO: Converting to disk0:/
+</span><span class='line'>Type help or '?' for a list of available commands.
+</span><span class='line'>ciscoasa></span></code></pre></td></tr></table></div></figure>
+
+
+<ol>
+<li>You should follow steps 9 - 12 exactly as in Cisco&#8217;s guide.</li>
+<li>I would like to add to Cisco&#8217;s step 13.  Cisco uses the command &#8220;password password&#8221; which should actually be &#8220;passwd password&#8221;.</li>
+<li>Cisco&#8217;s step 14 is where the fun begins!  Cisco says to type the command &#8220;config-register value&#8221; where value is the number you recorded in step 5.  THIS IS WRONG WRONG WRONG!!!!!.   If you follow Cisco&#8217;s step 14 and then step 15, yes you will have successfully reset your password, but if you reboot your ASA or loose power your ASA will stop at the ROMMON prompt (i.e. rommon #1>).  Instead, in step 14 you should type &#8220;config-register 0x10011&#8221; and then precede to step 15.  Then, if you ever reboot you ASA or loose power, it should fully reboot and not be stuck at the rommon #1> prompt.</li>
+</ol>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Gerald L. Hevener Jr., M.S.</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-01-18T23:13:00-05:00" pubdate data-updated="true">Jan 18<span>th</span>, 2013</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://jackl0phty.org/blog/blog/2013/01/18/how-to-recover-the-password-for-the-cisco-asa-5505-adaptive-security-appliance/" data-via="jackl0phty" data-counturl="http://jackl0phty.org/blog/blog/2013/01/18/how-to-recover-the-password-for-the-cisco-asa-5505-adaptive-security-appliance/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/blog/2013/01/18/using-perl-to-execute-remote-commands/" title="Previous Post: Using Perl to Execute Remote Commands">&laquo; Using Perl to Execute Remote Commands</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/blog/2013/01/18/using-perl-to-print-avery-labels/" title="Next Post: Using Perl to Print Avery Labels">Using Perl to Print Avery Labels &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/blog/2013/05/24/deploy-a-caching-bind9-chrooted-dns-server-with-opscode-chef/">Deploy a caching Bind9 CHROOTed DNS server with Opscode Chef</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/blog/2013/05/23/howto-upgrade-from-debian-squeeze-to-wheezy/">Howto: Upgrade from Debian squeeze to wheezy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/blog/2013/01/18/using-perl-to-print-avery-labels/">Using Perl to Print Avery Labels</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/blog/2013/01/18/how-to-recover-the-password-for-the-cisco-asa-5505-adaptive-security-appliance/">How to Recover the Password for the Cisco ASA 5505 Adaptive Security Appliance</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/blog/2013/01/18/using-perl-to-execute-remote-commands/">Using Perl to Execute Remote Commands</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/jackl0phty">@jackl0phty</a> on GitHub
+  
+  <br /> <br />
+  <a href="https://github.com/jackl0phty/opschef-cookbook-avahi-daemon">opschef-cookbook-avahi-daemon</a>
+  <br />
+  <a href="https://github.com/jackl0phty/opschef-cookbook-unix-shells">opschef-cookbook-unix-shells</a>
+  <br />
+  <a href="https://github.com/jackl0phty/opschef-cookbook-sptoolkit">opschef-cookbook-sptoolkit</a>
+  <br />
+  <a href="https://github.com/jackl0phty/opschef-cookbook-linux-gamer">opschef-cookbook-linux-gamer</a>
+  <br />
+  <a href="https://github.com/jackl0phty/opschef-cookbook-linux-dev-env">opschef-cookbook-linux-dev-env</a>
+  <br />
+  <a href="https://github.com/jackl0phty/opschef-cookbook-fog">opschef-cookbook-fog</a>
+  <br />
+  <a href="https://github.com/jackl0phty/opschef-cookbook-bind-chroot">opschef-cookbook-bind-chroot</a>
+  <br />
+  <a href="https://github.com/jackl0phty/opschef-cookbook-pvpgn">opschef-cookbook-pvpgn</a>
+  <br />
+  <a href="https://github.com/jackl0phty/opschef-cookbook-openvas">opschef-cookbook-openvas</a>
+  <br />
+  <a href="https://github.com/jackl0phty/opschef-cookbook-ldapknife">opschef-cookbook-ldapknife</a>
+  <br />
+  <a href="https://github.com/jackl0phty/opschef-cookbook-rackspaceknife">opschef-cookbook-rackspaceknife</a>
+  <br />
+  <a href="https://github.com/jackl0phty/snmp-rndc-stat">snmp-rndc-stats</a>
+
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'jackl0phty',
+            count: 15,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/blog/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating...</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("jackl0phty", 5, true);
+    });
+  </script>
+  <script src="/blog/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/jackl0phty" class="twitter-follow-button" data-show-count="true">Follow @jackl0phty</a>
+  
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p><center>
+  Copyright &copy; 2013 - Gerald L. Hevener Jr., M.S. Jackl0phty LLC
+  <br>
+  <!-- <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span> -->
+  Powered by <a href="http://octopress.org">Octopress</a>, <a href="http://kernel.org">Linux</a>, <a href="http://debian.org">Debian</a>, <a href="http://www.ruby-lang.org/en/">Ruby</a>, <a href="http://www.mongodb.org/">MongoDB</a>, <a href="http://www.perl.org">Perl</a>, <a href="http://www.rackspace.com/cloud/files">Rackspace Cloud Files</a>
+  </center></p>  
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'jackl0phty';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://jackl0phty.org/blog/blog/2013/01/18/how-to-recover-the-password-for-the-cisco-asa-5505-adaptive-security-appliance/';
+        var disqus_url = 'http://jackl0phty.org/blog/blog/2013/01/18/how-to-recover-the-password-for-the-cisco-asa-5505-adaptive-security-appliance/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,1001 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Deploy a caching Bind9 CHROOTed DNS server with Opscode Chef - Jackl0phty's Blog</title>
+  <meta name="author" content="Gerald L. Hevener Jr., M.S.">
+
+  
+  <meta name="description" content="This blog post will discuss how to use the industry leading configuration management tool Chef, from Opscode, to deploy a caching Bind9
+DNS server &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://jackl0phty.org/blog/blog/2013/05/24/deploy-a-caching-bind9-chrooted-dns-server-with-opscode-chef/">
+  <link href="/blog/favicon.png" rel="icon">
+  <link href="/blog/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/blog/javascripts/modernizr-2.0.js"></script>
+  <script src="/blog/javascripts/ender.js"></script>
+  <script src="/blog/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/blog/atom.xml" rel="alternate" title="Jackl0phty's Blog" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-39906289-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/blog/">Jackl0phty's Blog</a></h1>
+  
+    <h2>Rants, tirades, and sporadic outbursts from 'the Linux guy'.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/blog/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:jackl0phty.org/blog" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="http://jackl0phty.org">Home</a></li>
+  <li><a href="/blog/">Blog</a></li>
+  <li><a href="/blog/blog/archives">Archives</a></li>
+  <li><a href="http://search.cpan.org/~jlophty/">CPAN</a></li>
+  <li><a href="https://github.com/jackl0phty">Github</a></li>
+  <li><a href="http://community.opscode.com/users/jackl0phty">Chef</a></li>
+  <li><a href="http://www.linkedin.com/in/geraldhevener">LinkedIn</a></li>
+  <li><a href="https://plus.google.com/115179562165561540174">Google+</a></li>
+  <li><a href="http://www.youtube.com/user/jackl0phty">YouTube</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Deploy a Caching Bind9 CHROOTed DNS Server With Opscode Chef</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-05-24T19:53:00-04:00" pubdate data-updated="true">May 24<span>th</span>, 2013</time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>This blog post will discuss how to use the industry leading configuration management tool <a href="https://learnchef.opscode.com/">Chef</a>, from <a href="http://www.opscode.com/">Opscode</a>, to deploy a caching Bind9
+DNS server installed in a CHROOT jail environment.</p>
+
+<p>First download and install my bind-chroot cookbook from within your main chef-repo like so:</p>
+
+<figure class='code'><figcaption><span>Install my bind-chroot cookbook from the community site </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>skywalker@laptop ~/chef-repo/ $ knife cookbook site install bind-chroot</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<!-- more -->
+
+
+<p>Include the bind-chroot::chroot recipe in your node&#8217;s runlist like so:</p>
+
+<figure class='code'><figcaption><span>Add bind-chroot::chroot recipe to your node&#8217;s runlist </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>{
+</span><span class='line'>    "normal": {
+</span><span class='line'>    },
+</span><span class='line'>    "name": "dns1",
+</span><span class='line'>    "chef_environment": "production",
+</span><span class='line'>    "override": {
+</span><span class='line'>    },
+</span><span class='line'>  "production": {
+</span><span class='line'>    },
+</span><span class='line'>    "json_class": "Chef::Node",
+</span><span class='line'>    "automatic": {
+</span><span class='line'>    },
+</span><span class='line'>    "run_list": [
+</span><span class='line'>  "recipe[bind-chroot::chroot]"
+</span><span class='line'>
+</span><span class='line'>    ],
+</span><span class='line'>    "chef_type": "node"
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Update your node&#8217;s definition like so:</p>
+
+<figure class='code'><figcaption><span>Update your node&#8217;s definition </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>skywaler@laptop ~/chef-repo/ $ knife node from file nodes/dns1.json
+</span><span class='line'>Updated Node dns1!
+</span><span class='line'>skywalker@laptop ~/chef-repo/ $</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now run chef-client on the node you want to deploy bind9 to like so:</p>
+
+<figure class='code'><figcaption><span>Run chef-client on node you want to install bind9 on </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>dns1 ~ # chef-client
+</span><span class='line'>Starting Chef Client, version 11.4.4
+</span><span class='line'>[2013-05-28T13:02:51-04:00] INFO: *** Chef 11.4.4 ***</span></code></pre></td></tr></table></div></figure>
+
+
+<p>If all went well named should now be installed in a CHROOT, jailed to /var/bind9/chroot, &amp; listening.
+We can check if named is listening with netstat like so:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>glh-laptop2 etc # netstat -nlp |grep named
+</span><span class='line'>tcp        0      0 10.102.180.85:53        0.0.0.0:*               LISTEN      6057/named      
+</span><span class='line'>tcp        0      0 127.0.0.1:53            0.0.0.0:*               LISTEN      6057/named      
+</span><span class='line'>tcp        0      0 127.0.0.1:953           0.0.0.0:*               LISTEN      6057/named      
+</span><span class='line'>tcp6       0      0 :::53                   :::*                    LISTEN      6057/named      
+</span><span class='line'>tcp6       0      0 ::1:953                 :::*                    LISTEN      6057/named      
+</span><span class='line'>udp        0      0 10.102.180.85:53        0.0.0.0:*                           6057/named      
+</span><span class='line'>udp        0      0 127.0.0.1:53            0.0.0.0:*                           6057/named      
+</span><span class='line'>udp6       0      0 :::53                   :::*                                6057/named</span></code></pre></td></tr></table></div></figure>
+
+
+<p>As you can see from the netstat output above, named is listening on TCP and UDP ports 53.</p>
+
+<p>By default Bind9, on Debian &amp; derivatives, is already configured as a &#8220;caching only&#8221; name server.</p>
+
+<p>Let&#8217;s test Bind9&#8217;s caching by looking up a domain, say google.com, with our dns client dig like so</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>dns1 ~ # dig google.com @localhost
+</span><span class='line'>
+</span><span class='line'>; &lt;&lt;>> DiG 9.9.2-P1 &lt;&lt;>> google.com @localhost
+</span><span class='line'>;; global options: +cmd
+</span><span class='line'>;; Got answer:
+</span><span class='line'>;; ->>HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 53144
+</span><span class='line'>;; flags: qr rd ra; QUERY: 1, ANSWER: 11, AUTHORITY: 4, ADDITIONAL: 5
+</span><span class='line'>
+</span><span class='line'>;; OPT PSEUDOSECTION:
+</span><span class='line'>; EDNS: version: 0, flags:; udp: 4096
+</span><span class='line'>;; QUESTION SECTION:
+</span><span class='line'>;google.com.          IN  A
+</span><span class='line'>
+</span><span class='line'>;; ANSWER SECTION:
+</span><span class='line'>google.com.       46  IN  A   74.125.228.98
+</span><span class='line'>google.com.       46  IN  A   74.125.228.97
+</span><span class='line'>google.com.       46  IN  A   74.125.228.104
+</span><span class='line'>google.com.       46  IN  A   74.125.228.96
+</span><span class='line'>google.com.       46  IN  A   74.125.228.110
+</span><span class='line'>google.com.       46  IN  A   74.125.228.100
+</span><span class='line'>google.com.       46  IN  A   74.125.228.105
+</span><span class='line'>google.com.       46  IN  A   74.125.228.103
+</span><span class='line'>google.com.       46  IN  A   74.125.228.102
+</span><span class='line'>google.com.       46  IN  A   74.125.228.101
+</span><span class='line'>google.com.       46  IN  A   74.125.228.99
+</span><span class='line'>
+</span><span class='line'>;; AUTHORITY SECTION:
+</span><span class='line'>google.com.       4587    IN  NS  ns3.google.com.
+</span><span class='line'>google.com.       4587    IN  NS  ns4.google.com.
+</span><span class='line'>google.com.       4587    IN  NS  ns2.google.com.
+</span><span class='line'>google.com.       4587    IN  NS  ns1.google.com.
+</span><span class='line'>
+</span><span class='line'>;; ADDITIONAL SECTION:
+</span><span class='line'>ns2.google.com.       69375   IN  A   216.239.34.10
+</span><span class='line'>ns1.google.com.       69375   IN  A   216.239.32.10
+</span><span class='line'>ns3.google.com.       75822   IN  A   216.239.36.10
+</span><span class='line'>ns4.google.com.       69375   IN  A   216.239.38.10
+</span><span class='line'>
+</span><span class='line'>;; Query time: 26 msec
+</span><span class='line'>;; SERVER: 10.101.4.36#53(10.101.4.36)
+</span><span class='line'>;; WHEN: Tue May 28 15:45:38 2013
+</span><span class='line'>;; MSG SIZE  rcvd: 351
+</span><span class='line'>
+</span><span class='line'>dns1 ~ #</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Note the line containing &#8220;Query time&#8221; shows our query took 26 milliseconds to complete.
+Now the domain google.com should be cached so let&#8217;s do another query and see if our time improves.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>dns1 ~ # dig google.com @localhost
+</span><span class='line'>
+</span><span class='line'>; &lt;&lt;>> DiG 9.9.2-P1 &lt;&lt;>> google.com @localhost
+</span><span class='line'>;; global options: +cmd
+</span><span class='line'>;; Got answer:
+</span><span class='line'>;; ->>HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 18367
+</span><span class='line'>;; flags: qr rd ra; QUERY: 1, ANSWER: 11, AUTHORITY: 4, ADDITIONAL: 5
+</span><span class='line'>
+</span><span class='line'>;; OPT PSEUDOSECTION:
+</span><span class='line'>; EDNS: version: 0, flags:; udp: 4096
+</span><span class='line'>;; QUESTION SECTION:
+</span><span class='line'>;google.com.          IN  A
+</span><span class='line'>
+</span><span class='line'>;; ANSWER SECTION:
+</span><span class='line'>google.com.       251 IN  A   74.125.228.105
+</span><span class='line'>google.com.       251 IN  A   74.125.228.99
+</span><span class='line'>google.com.       251 IN  A   74.125.228.96
+</span><span class='line'>google.com.       251 IN  A   74.125.228.102
+</span><span class='line'>google.com.       251 IN  A   74.125.228.98
+</span><span class='line'>google.com.       251 IN  A   74.125.228.97
+</span><span class='line'>google.com.       251 IN  A   74.125.228.101
+</span><span class='line'>google.com.       251 IN  A   74.125.228.110
+</span><span class='line'>google.com.       251 IN  A   74.125.228.103
+</span><span class='line'>google.com.       251 IN  A   74.125.228.100
+</span><span class='line'>google.com.       251 IN  A   74.125.228.104
+</span><span class='line'>
+</span><span class='line'>;; AUTHORITY SECTION:
+</span><span class='line'>google.com.       11118   IN  NS  ns3.google.com.
+</span><span class='line'>google.com.       11118   IN  NS  ns1.google.com.
+</span><span class='line'>google.com.       11118   IN  NS  ns4.google.com.
+</span><span class='line'>google.com.       11118   IN  NS  ns2.google.com.
+</span><span class='line'>
+</span><span class='line'>;; ADDITIONAL SECTION:
+</span><span class='line'>ns2.google.com.       75906   IN  A   216.239.34.10
+</span><span class='line'>ns1.google.com.       75906   IN  A   216.239.32.10
+</span><span class='line'>ns3.google.com.       82353   IN  A   216.239.36.10
+</span><span class='line'>ns4.google.com.       75906   IN  A   216.239.38.10
+</span><span class='line'>
+</span><span class='line'>__;; Query time: 0 msec__
+</span><span class='line'>;; SERVER: 10.101.4.36#53(10.101.4.36)
+</span><span class='line'>;; WHEN: Tue May 28 13:56:48 2013
+</span><span class='line'>;; MSG SIZE  rcvd: 351
+</span><span class='line'>
+</span><span class='line'>dns1 ~ etc #</span></code></pre></td></tr></table></div></figure>
+
+
+<p>As you can see above our query took 0 milliseconds! That&#8217;s obviously an improvement from our original query time of 26 milliseconds.</p>
+
+<p>This record will be cached according to the TTL (Time To Live) of the zone record.</p>
+
+<p>Let&#8217;s do another query and suppress some of dig&#8217;s output like so:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>dns1 ~ # dig +noauthority +noquestion +noadditional +nostats google.com @localhost
+</span><span class='line'>
+</span><span class='line'>; &lt;&lt;>> DiG 9.9.2-P1 &lt;&lt;>> +noauthority +noquestion +noadditional +nostats google.com @localhost
+</span><span class='line'>;; global options: +cmd
+</span><span class='line'>;; Got answer:
+</span><span class='line'>;; ->>HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 48993
+</span><span class='line'>;; flags: qr rd ra; QUERY: 1, ANSWER: 11, AUTHORITY: 4, ADDITIONAL: 5
+</span><span class='line'>
+</span><span class='line'>;; OPT PSEUDOSECTION:
+</span><span class='line'>; EDNS: version: 0, flags:; udp: 4096
+</span><span class='line'>;; ANSWER SECTION:
+</span><span class='line'>google.com.       300 IN  A   173.194.43.5
+</span><span class='line'>google.com.       300 IN  A   173.194.43.9
+</span><span class='line'>google.com.       300 IN  A   173.194.43.14
+</span><span class='line'>google.com.       300 IN  A   173.194.43.8
+</span><span class='line'>google.com.       300 IN  A   173.194.43.0
+</span><span class='line'>google.com.       300 IN  A   173.194.43.4
+</span><span class='line'>google.com.       300 IN  A   173.194.43.2
+</span><span class='line'>google.com.       300 IN  A   173.194.43.3
+</span><span class='line'>google.com.       300 IN  A   173.194.43.1
+</span><span class='line'>google.com.       300 IN  A   173.194.43.7
+</span><span class='line'>google.com.       300 IN  A   173.194.43.6</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The number 300 from the above dig output is the <strong>time remaining until the DNS cache will be updated</strong> in seconds.  Since this is our caching nameserver if we wait a few seconds/minutes and do another query this number should decrease like in the output below:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>dns1 1 # dig +noauthority +noquestion +noadditional +nostats google.com @localhost
+</span><span class='line'>
+</span><span class='line'>; &lt;&lt;>> DiG 9.9.2-P1 &lt;&lt;>> +noauthority +noquestion +noadditional +nostats google.com @localhost
+</span><span class='line'>;; global options: +cmd
+</span><span class='line'>;; Got answer:
+</span><span class='line'>;; ->>HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 18942
+</span><span class='line'>;; flags: qr rd ra; QUERY: 1, ANSWER: 11, AUTHORITY: 4, ADDITIONAL: 5
+</span><span class='line'>
+</span><span class='line'>;; OPT PSEUDOSECTION:
+</span><span class='line'>; EDNS: version: 0, flags:; udp: 4096
+</span><span class='line'>;; ANSWER SECTION:
+</span><span class='line'>google.com.       47  IN  A   173.194.43.3
+</span><span class='line'>google.com.       47  IN  A   173.194.43.4
+</span><span class='line'>google.com.       47  IN  A   173.194.43.1
+</span><span class='line'>google.com.       47  IN  A   173.194.43.6
+</span><span class='line'>google.com.       47  IN  A   173.194.43.8
+</span><span class='line'>google.com.       47  IN  A   173.194.43.7
+</span><span class='line'>google.com.       47  IN  A   173.194.43.0
+</span><span class='line'>google.com.       47  IN  A   173.194.43.14
+</span><span class='line'>google.com.       47  IN  A   173.194.43.9
+</span><span class='line'>google.com.       47  IN  A   173.194.43.5
+</span><span class='line'>google.com.       47  IN  A   173.194.43.2</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Notice time remaining until cache will be updated on our caching bind9 name server has now decreased from 300 seconds to 47 seconds.
+So if we wait more then 47 seconds and do another query we should see a number much greater then 47.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>dns1 ~ # dig +noauthority +noquestion +noadditional +nostats google.com @localhost
+</span><span class='line'>
+</span><span class='line'>; &lt;&lt;>> DiG 9.9.2-P1 &lt;&lt;>> +noauthority +noquestion +noadditional +nostats google.com @localhost
+</span><span class='line'>;; global options: +cmd
+</span><span class='line'>;; Got answer:
+</span><span class='line'>;; ->>HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 43033
+</span><span class='line'>;; flags: qr rd ra; QUERY: 1, ANSWER: 11, AUTHORITY: 4, ADDITIONAL: 5
+</span><span class='line'>
+</span><span class='line'>;; OPT PSEUDOSECTION:
+</span><span class='line'>; EDNS: version: 0, flags:; udp: 4096
+</span><span class='line'>;; ANSWER SECTION:
+</span><span class='line'>google.com.       300 IN  A   173.194.43.5
+</span><span class='line'>google.com.       300 IN  A   173.194.43.14
+</span><span class='line'>google.com.       300 IN  A   173.194.43.6
+</span><span class='line'>google.com.       300 IN  A   173.194.43.3
+</span><span class='line'>google.com.       300 IN  A   173.194.43.2
+</span><span class='line'>google.com.       300 IN  A   173.194.43.8
+</span><span class='line'>google.com.       300 IN  A   173.194.43.0
+</span><span class='line'>google.com.       300 IN  A   173.194.43.9
+</span><span class='line'>google.com.       300 IN  A   173.194.43.4
+</span><span class='line'>google.com.       300 IN  A   173.194.43.7
+</span><span class='line'>google.com.       300 IN  A   173.194.43.1</span></code></pre></td></tr></table></div></figure>
+
+
+<p>As you can see time until cache will be updated is back up to 300 seconds or 5 minutes.</p>
+
+<p>If we want to find the actuall TTL for google.com we&#8217;ll need to query an authorative name server for google.com.
+Let&#8217;s get a list of authorative name servers with the following dig command like so:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>dns1 ~ # dig +authority +noquestion +noadditional +nostats +noanswer google.com @localhost
+</span><span class='line'>
+</span><span class='line'>; &lt;&lt;>> DiG 9.9.2-P1 &lt;&lt;>> +authority +noquestion +noadditional +nostats +noanswer google.com @localhost
+</span><span class='line'>;; global options: +cmd
+</span><span class='line'>;; Got answer:
+</span><span class='line'>;; ->>HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 18393
+</span><span class='line'>;; flags: qr rd ra; QUERY: 1, ANSWER: 11, AUTHORITY: 4, ADDITIONAL: 5
+</span><span class='line'>
+</span><span class='line'>;; OPT PSEUDOSECTION:
+</span><span class='line'>; EDNS: version: 0, flags:; udp: 4096
+</span><span class='line'>;; AUTHORITY SECTION:
+</span><span class='line'>google.com.       166915  IN  NS  ns4.google.com.
+</span><span class='line'>google.com.       166915  IN  NS  ns2.google.com.
+</span><span class='line'>google.com.       166915  IN  NS  ns3.google.com.
+</span><span class='line'>google.com.       166915  IN  NS  ns1.google.com.
+</span><span class='line'>
+</span><span class='line'>dns1 ~ #</span></code></pre></td></tr></table></div></figure>
+
+
+<p>So from the above output we see that name server ns1.google.com is authorative for google.com.</p>
+
+<p>If we query ns1.google.com we can get the actual TTL like so:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>skywalker@laptop ~ $ dig google.com @ns1.google.com
+</span><span class='line'>
+</span><span class='line'>; &lt;&lt;>> DiG 9.9.2-P1 &lt;&lt;>> google.com @ns1.google.com
+</span><span class='line'>;; global options: +cmd
+</span><span class='line'>;; Got answer:
+</span><span class='line'>;; ->>HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 57411
+</span><span class='line'>;; flags: qr aa rd; QUERY: 1, ANSWER: 11, AUTHORITY: 0, ADDITIONAL: 0
+</span><span class='line'>;; WARNING: recursion requested but not available
+</span><span class='line'>
+</span><span class='line'>;; QUESTION SECTION:
+</span><span class='line'>;google.com.          IN  A
+</span><span class='line'>
+</span><span class='line'>;; ANSWER SECTION:
+</span><span class='line'>google.com.       300 IN  A   173.194.43.14
+</span><span class='line'>google.com.       300 IN  A   173.194.43.8
+</span><span class='line'>google.com.       300 IN  A   173.194.43.3
+</span><span class='line'>google.com.       300 IN  A   173.194.43.4
+</span><span class='line'>google.com.       300 IN  A   173.194.43.6
+</span><span class='line'>google.com.       300 IN  A   173.194.43.5
+</span><span class='line'>google.com.       300 IN  A   173.194.43.7
+</span><span class='line'>google.com.       300 IN  A   173.194.43.9
+</span><span class='line'>google.com.       300 IN  A   173.194.43.2
+</span><span class='line'>google.com.       300 IN  A   173.194.43.1
+</span><span class='line'>google.com.       300 IN  A   173.194.43.0
+</span><span class='line'>
+</span><span class='line'>;; Query time: 31 msec
+</span><span class='line'>;; SERVER: 216.239.32.10#53(216.239.32.10)
+</span><span class='line'>;; WHEN: Tue May 28 17:23:38 2013
+</span><span class='line'>;; MSG SIZE  rcvd: 204
+</span><span class='line'>
+</span><span class='line'>skywalker@laptop ~ $</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Notice the TTL is 300.  Also notice the line containing &#8220;aa&#8221; following the line containing &#8220;HEADER&#8221; as shown below:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>;; flags: qr aa rd; QUERY: 1, ANSWER: 11, AUTHORITY: 0, ADDITIONAL: 0</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Notice the &#8220;aa&#8221;.  This means this is an authorative answer for the domain google.com.</p>
+
+<p>If we do another query you&#8217;ll see the TTL remains 300 and doesn&#8217;t change like it did against our own local bind9 server.
+This is the actual TTL (Time To Live) for domain google.com since we queried an authorative name server.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>skywalker@laptop ~ $ dig google.com @ns1.google.com
+</span><span class='line'>
+</span><span class='line'>; &lt;&lt;>> DiG 9.9.2-P1 &lt;&lt;>> google.com @ns1.google.com
+</span><span class='line'>;; global options: +cmd
+</span><span class='line'>;; Got answer:
+</span><span class='line'>;; ->>HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 14944
+</span><span class='line'>;; flags: qr aa rd; QUERY: 1, ANSWER: 11, AUTHORITY: 0, ADDITIONAL: 0
+</span><span class='line'>;; WARNING: recursion requested but not available
+</span><span class='line'>
+</span><span class='line'>;; QUESTION SECTION:
+</span><span class='line'>;google.com.          IN  A
+</span><span class='line'>
+</span><span class='line'>;; ANSWER SECTION:
+</span><span class='line'>google.com.       300 IN  A   173.194.43.6
+</span><span class='line'>google.com.       300 IN  A   173.194.43.9
+</span><span class='line'>google.com.       300 IN  A   173.194.43.3
+</span><span class='line'>google.com.       300 IN  A   173.194.43.1
+</span><span class='line'>google.com.       300 IN  A   173.194.43.8
+</span><span class='line'>google.com.       300 IN  A   173.194.43.0
+</span><span class='line'>google.com.       300 IN  A   173.194.43.7
+</span><span class='line'>google.com.       300 IN  A   173.194.43.4
+</span><span class='line'>google.com.       300 IN  A   173.194.43.2
+</span><span class='line'>google.com.       300 IN  A   173.194.43.5
+</span><span class='line'>google.com.       300 IN  A   173.194.43.14
+</span><span class='line'>
+</span><span class='line'>;; Query time: 56 msec
+</span><span class='line'>;; SERVER: 216.239.32.10#53(216.239.32.10)
+</span><span class='line'>;; WHEN: Tue May 28 17:23:50 2013
+</span><span class='line'>;; MSG SIZE  rcvd: 204
+</span><span class='line'>
+</span><span class='line'>skywaler@laptop ~ $</span></code></pre></td></tr></table></div></figure>
+
+
+<p>We can now dump our DNS cache to file with the command below.  If you&#8217;re using my <a href="http://community.opscode.com/cookbooks/bind-chroot">bind-chroot</a> cookbook your cache file should be located at /var/bind9/chroot/var/cache/bind/named_dump.db.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>rndc dumpdb -cache</span></code></pre></td></tr></table></div></figure>
+
+
+<p>We can now view the contents of our cache and look for google.com like so:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cat /var/bind9/chroot/var/cache/bind/named_dump.db |grep google.com
+</span><span class='line'>google.com.       172385  NS  ns1.google.com.
+</span><span class='line'>          172385  NS  ns2.google.com.
+</span><span class='line'>          172385  NS  ns3.google.com.
+</span><span class='line'>          172385  NS  ns4.google.com.
+</span><span class='line'>ns1.google.com.       172385  A   216.239.32.10
+</span><span class='line'>ns2.google.com.       172385  A   216.239.34.10
+</span><span class='line'>ns3.google.com.       172385  A   216.239.36.10
+</span><span class='line'>ns4.google.com.       172385  A   216.239.38.10
+</span><span class='line'>skywalker@laptop ~ # rndc dumpdb -cache</span></code></pre></td></tr></table></div></figure>
+
+
+<p>You can see, by default, bind9 cached google.com for ~172385 seconds or ~47 hours!</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Gerald L. Hevener Jr., M.S.</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-05-24T19:53:00-04:00" pubdate data-updated="true">May 24<span>th</span>, 2013</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://jackl0phty.org/blog/blog/2013/05/24/deploy-a-caching-bind9-chrooted-dns-server-with-opscode-chef/" data-via="jackl0phty" data-counturl="http://jackl0phty.org/blog/blog/2013/05/24/deploy-a-caching-bind9-chrooted-dns-server-with-opscode-chef/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/blog/2013/05/23/howto-upgrade-from-debian-squeeze-to-wheezy/" title="Previous Post: Howto: Upgrade from Debian squeeze to wheezy">&laquo; Howto: Upgrade from Debian squeeze to wheezy</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/blog/2013/05/24/deploy-a-caching-bind9-chrooted-dns-server-with-opscode-chef/">Deploy a caching Bind9 CHROOTed DNS server with Opscode Chef</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/blog/2013/05/23/howto-upgrade-from-debian-squeeze-to-wheezy/">Howto: Upgrade from Debian squeeze to wheezy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/blog/2013/01/18/using-perl-to-print-avery-labels/">Using Perl to Print Avery Labels</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/blog/2013/01/18/how-to-recover-the-password-for-the-cisco-asa-5505-adaptive-security-appliance/">How to Recover the Password for the Cisco ASA 5505 Adaptive Security Appliance</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/blog/2013/01/18/using-perl-to-execute-remote-commands/">Using Perl to Execute Remote Commands</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/jackl0phty">@jackl0phty</a> on GitHub
+  
+  <br /> <br />
+  <a href="https://github.com/jackl0phty/opschef-cookbook-avahi-daemon">opschef-cookbook-avahi-daemon</a>
+  <br />
+  <a href="https://github.com/jackl0phty/opschef-cookbook-unix-shells">opschef-cookbook-unix-shells</a>
+  <br />
+  <a href="https://github.com/jackl0phty/opschef-cookbook-sptoolkit">opschef-cookbook-sptoolkit</a>
+  <br />
+  <a href="https://github.com/jackl0phty/opschef-cookbook-linux-gamer">opschef-cookbook-linux-gamer</a>
+  <br />
+  <a href="https://github.com/jackl0phty/opschef-cookbook-linux-dev-env">opschef-cookbook-linux-dev-env</a>
+  <br />
+  <a href="https://github.com/jackl0phty/opschef-cookbook-fog">opschef-cookbook-fog</a>
+  <br />
+  <a href="https://github.com/jackl0phty/opschef-cookbook-bind-chroot">opschef-cookbook-bind-chroot</a>
+  <br />
+  <a href="https://github.com/jackl0phty/opschef-cookbook-pvpgn">opschef-cookbook-pvpgn</a>
+  <br />
+  <a href="https://github.com/jackl0phty/opschef-cookbook-openvas">opschef-cookbook-openvas</a>
+  <br />
+  <a href="https://github.com/jackl0phty/opschef-cookbook-ldapknife">opschef-cookbook-ldapknife</a>
+  <br />
+  <a href="https://github.com/jackl0phty/opschef-cookbook-rackspaceknife">opschef-cookbook-rackspaceknife</a>
+  <br />
+  <a href="https://github.com/jackl0phty/snmp-rndc-stat">snmp-rndc-stats</a>
+
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'jackl0phty',
+            count: 15,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/blog/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating...</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("jackl0phty", 5, true);
+    });
+  </script>
+  <script src="/blog/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/jackl0phty" class="twitter-follow-button" data-show-count="true">Follow @jackl0phty</a>
+  
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p><center>
+  Copyright &copy; 2013 - Gerald L. Hevener Jr., M.S. Jackl0phty LLC
+  <br>
+  <!-- <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span> -->
+  Powered by <a href="http://octopress.org">Octopress</a>, <a href="http://kernel.org">Linux</a>, <a href="http://debian.org">Debian</a>, <a href="http://www.ruby-lang.org/en/">Ruby</a>, <a href="http://www.mongodb.org/">MongoDB</a>, <a href="http://www.perl.org">Perl</a>, <a href="http://www.rackspace.com/cloud/files">Rackspace Cloud Files</a>
+  </center></p>  
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'jackl0phty';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://jackl0phty.org/blog/blog/2013/05/24/deploy-a-caching-bind9-chrooted-dns-server-with-opscode-chef/';
+        var disqus_url = 'http://jackl0phty.org/blog/blog/2013/05/24/deploy-a-caching-bind9-chrooted-dns-server-with-opscode-chef/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

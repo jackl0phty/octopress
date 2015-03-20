@@ -1,0 +1,738 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Using Perl to Print Avery Labels - Jackl0phty's Blog</title>
+  <meta name="author" content="Gerald L. Hevener Jr., M.S.">
+
+  
+  <meta name="description" content="This blog will discuss how to use the Perl module PostScript::MailLabels to print Avery labels. The basic design is to have your user(s) run the &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://jackl0phty.org/blog/blog/2013/01/18/using-perl-to-print-avery-labels/">
+  <link href="/blog/favicon.png" rel="icon">
+  <link href="/blog/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/blog/javascripts/modernizr-2.0.js"></script>
+  <script src="/blog/javascripts/ender.js"></script>
+  <script src="/blog/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/blog/atom.xml" rel="alternate" title="Jackl0phty's Blog" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-39906289-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/blog/">Jackl0phty's Blog</a></h1>
+  
+    <h2>Rants, tirades, and sporadic outbursts from 'the Linux guy'.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/blog/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:jackl0phty.org/blog" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="http://jackl0phty.org">Home</a></li>
+  <li><a href="/blog/">Blog</a></li>
+  <li><a href="/blog/blog/archives">Archives</a></li>
+  <li><a href="http://search.cpan.org/~jlophty/">CPAN</a></li>
+  <li><a href="https://github.com/jackl0phty">Github</a></li>
+  <li><a href="http://community.opscode.com/users/jackl0phty">Chef</a></li>
+  <li><a href="http://www.linkedin.com/in/geraldhevener">LinkedIn</a></li>
+  <li><a href="https://plus.google.com/115179562165561540174">Google+</a></li>
+  <li><a href="http://www.youtube.com/user/jackl0phty">YouTube</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Using Perl to Print Avery Labels</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-01-18T23:41:00-05:00" pubdate data-updated="true">Jan 18<span>th</span>, 2013</time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>This blog will discuss how to use the Perl module PostScript::MailLabels to print Avery labels.</p>
+
+<p>The basic design is to have your user(s) run the following BASH shell script, which will then call a Perl script that builds a postscript file, then the BASH script will send the postscript file to the printer.</p>
+
+<p>Here is the shell script your user(s) will run.</p>
+
+<!-- more -->
+
+
+
+
+<figure class='code'><figcaption><span>Set Linux Environment to Print Avery Labels </span><a href='https://gist.github.com/jackl0phty/4247878/raw/be2223e3cf561c4db010a30fc95de558291df5fa/perl-avery-labels'>link</a></figcaption> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="c">#!/bin/bash</span>
+</span><span class='line'>
+</span><span class='line'><span class="c">###############################################################################</span>
+</span><span class='line'><span class="c"># This shell script can be used to print Avery                                #</span>
+</span><span class='line'><span class="c"># address labels.                                                             #</span>
+</span><span class='line'><span class="c">###############################################################################</span>
+</span><span class='line'><span class="c"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;),             #</span>
+</span><span class='line'><span class="c"># For any questions regarding the license of this software, please refer to   #</span>
+</span><span class='line'><span class="c"># the actual license at http://www.apache.org/licenses/LICENSE-2.0.txt.       #</span>
+</span><span class='line'><span class="c">###############################################################################</span>
+</span><span class='line'><span class="c">#                      DISCLAIMER OF WARRENTY                                 #</span>
+</span><span class='line'><span class="c"># BECAUSE THIS SOFTWARE IS LICENSED FREE OF CHARGE, THERE IS NO WARRANTY FOR  #</span>
+</span><span class='line'><span class="c"># THE SOFTWARE, TO THE EXTENT PERMITTED BY APPLICABLE LAW. EXCEPT WHEN        #</span>
+</span><span class='line'><span class="c"># OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES      #</span>
+</span><span class='line'><span class="c"># PROVIDE THE SOFTWARE &quot;AS IS&quot; WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED #</span>
+</span><span class='line'><span class="c"># OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF        #</span>
+</span><span class='line'><span class="c"># MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE ENTIRE RISK AS TO #</span>
+</span><span class='line'><span class="c"># THE QUALITY AND PERFORMANCE OF THE SOFTWARE IS WITH YOU. SHOULD THE         #</span>
+</span><span class='line'><span class="c"># SOFTWARE PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING,   #</span>
+</span><span class='line'><span class="c"># REPAIR, OR CORRECTION. IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR     #</span>
+</span><span class='line'><span class="c"># AGREED TO IN WRITING WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MAY  #</span>
+</span><span class='line'><span class="c"># MODIFY AND/OR REDISTRIBUTE THE SOFTWARE AS PERMITTED BY THE ABOVE LICENCE,  #</span>
+</span><span class='line'><span class="c"># BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY GENERAL, SPECIAL, INCIDENTAL,   #</span>
+</span><span class='line'><span class="c"># OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR INABILITY TO USE THE     #</span>
+</span><span class='line'><span class="c"># SOFTWARE (INCLUDING BUT NOT LIMITED TO LOSS OF DATA OR DATA BEING RENDERED  #</span>
+</span><span class='line'><span class="c"># INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD PARTIESOR A FAILURE OF THE   #</span>
+</span><span class='line'><span class="c"># SOFTWARE TO OPERATE WITH ANY OTHER SOFTWARE), EVEN IF SUCH HOLDER OR OTHER  #</span>
+</span><span class='line'><span class="c"># PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.                  #</span>
+</span><span class='line'><span class="c">###############################################################################</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># Must export default printer environment variable</span>
+</span><span class='line'><span class="c"># in order for lpr to function correctly. The rest</span>
+</span><span class='line'><span class="c"># will be executed from a Perl script.</span>
+</span><span class='line'>
+</span><span class='line'><span class="c">#declare variables</span>
+</span><span class='line'><span class="nv">FILEPATH</span><span class="o">=</span><span class="s2">&quot;/home/user1/&quot;</span>
+</span><span class='line'><span class="nv">DATE</span><span class="o">=</span><span class="sb">`</span>date +%m%d%y<span class="sb">`</span>
+</span><span class='line'><span class="nv">MYPERL</span><span class="o">=</span><span class="sb">`</span>which perl<span class="sb">`</span>
+</span><span class='line'><span class="nv">SCRIPT</span><span class="o">=</span><span class="k">${</span><span class="nv">FILEPATH</span><span class="k">}</span><span class="s1">&#39;print_addresses.pl&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># Get name of file user wants to process</span>
+</span><span class='line'><span class="nb">echo</span> <span class="s2">&quot;What printer do you want to print to?&quot;</span>
+</span><span class='line'><span class="nb">read </span>PRINTER
+</span><span class='line'>
+</span><span class='line'><span class="c">#echo &quot;Going to process: $DEFAULTPRINTER&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># Set default printer to DEFAULTPRINTER</span>
+</span><span class='line'><span class="nb">export </span><span class="nv">PRINTER</span><span class="o">=</span><span class="nv">$PRINTER</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># Call perl script which builds a postscript</span>
+</span><span class='line'><span class="c"># file and sends it to user&#39;s printer.</span>
+</span><span class='line'>perl <span class="nv">$SCRIPT</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># Send postscript file to the printer</span>
+</span><span class='line'><span class="sb">`</span>cat <span class="k">${</span><span class="nv">FILEPATH</span><span class="k">}</span><span class="nv">$DATE</span> | lpr -P <span class="nv">$PRINTER</span><span class="sb">`</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">exit </span>0
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The BASH script basically asks the user what printer they want to print to,  set&#8217;s the user&#8217;s DEFAULT printer, then calls your Perl script using the module PostScript::MailLabels to build a postscript file, then the BASH script  sends it to the user&#8217;s printer.</p>
+
+<p>Here is the Perl script which does most of the heavy lifting.</p>
+
+<figure class='code'><figcaption><span>Print Avery Labels </span><a href='https://gist.github.com/jackl0phty/4247908/raw/e408e56504ec079bf7975e504a43bdaa37c720b3/Perl-Print-Avery-Labels'>link</a></figcaption> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+<span class='line-number'>89</span>
+<span class='line-number'>90</span>
+<span class='line-number'>91</span>
+<span class='line-number'>92</span>
+<span class='line-number'>93</span>
+<span class='line-number'>94</span>
+<span class='line-number'>95</span>
+<span class='line-number'>96</span>
+<span class='line-number'>97</span>
+<span class='line-number'>98</span>
+<span class='line-number'>99</span>
+<span class='line-number'>100</span>
+<span class='line-number'>101</span>
+<span class='line-number'>102</span>
+<span class='line-number'>103</span>
+<span class='line-number'>104</span>
+<span class='line-number'>105</span>
+<span class='line-number'>106</span>
+<span class='line-number'>107</span>
+<span class='line-number'>108</span>
+<span class='line-number'>109</span>
+<span class='line-number'>110</span>
+<span class='line-number'>111</span>
+<span class='line-number'>112</span>
+<span class='line-number'>113</span>
+<span class='line-number'>114</span>
+<span class='line-number'>115</span>
+<span class='line-number'>116</span>
+<span class='line-number'>117</span>
+<span class='line-number'>118</span>
+<span class='line-number'>119</span>
+<span class='line-number'>120</span>
+<span class='line-number'>121</span>
+<span class='line-number'>122</span>
+<span class='line-number'>123</span>
+</pre></td><td class='code'><pre><code class='perl'><span class='line'><span class="c1">#!/usr/bin/perl -w</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">###############################################################################</span>
+</span><span class='line'><span class="c1">#This script will open a file containing a list of                            #</span>
+</span><span class='line'><span class="c1">##addresses, use the addresses to build a postscript file,                    #</span>
+</span><span class='line'><span class="c1">##and send that file to a printer.                                            #</span>
+</span><span class='line'><span class="c1">###############################################################################</span>
+</span><span class='line'><span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;),             # </span>
+</span><span class='line'><span class="c1"># For any questions regarding the license of this software, please refer to   #</span>
+</span><span class='line'><span class="c1"># the actual license at http://www.apache.org/licenses/LICENSE-2.0.txt.       #</span>
+</span><span class='line'><span class="c1">###############################################################################</span>
+</span><span class='line'><span class="c1">#                        DISCLAIMER OF WARRENTY                               #</span>
+</span><span class='line'><span class="c1"># BECAUSE THIS SOFTWARE IS LICENSED FREE OF CHARGE, THERE IS NO WARRANTY FOR  #</span>
+</span><span class='line'><span class="c1"># THE SOFTWARE, TO THE EXTENT PERMITTED BY APPLICABLE LAW. EXCEPT WHEN        #</span>
+</span><span class='line'><span class="c1"># OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES      #</span>
+</span><span class='line'><span class="c1"># PROVIDE THE SOFTWARE &quot;AS IS&quot; WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED #</span>
+</span><span class='line'><span class="c1"># OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF        #</span>
+</span><span class='line'><span class="c1"># MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE ENTIRE RISK AS TO #</span>
+</span><span class='line'><span class="c1"># THE QUALITY AND PERFORMANCE OF THE SOFTWARE IS WITH YOU. SHOULD THE         #</span>
+</span><span class='line'><span class="c1"># SOFTWARE PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING,   #</span>
+</span><span class='line'><span class="c1"># REPAIR, OR CORRECTION. IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR     #</span>
+</span><span class='line'><span class="c1"># AGREED TO IN WRITING WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MAY  #</span>
+</span><span class='line'><span class="c1"># MODIFY AND/OR REDISTRIBUTE THE SOFTWARE AS PERMITTED BY THE ABOVE LICENCE,  #</span>
+</span><span class='line'><span class="c1"># BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY GENERAL, SPECIAL, INCIDENTAL,   #</span>
+</span><span class='line'><span class="c1"># OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR INABILITY TO USE THE     #</span>
+</span><span class='line'><span class="c1"># SOFTWARE (INCLUDING BUT NOT LIMITED TO LOSS OF DATA OR DATA BEING RENDERED  #</span>
+</span><span class='line'><span class="c1"># INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD PARTIESOR A FAILURE OF THE   #</span>
+</span><span class='line'><span class="c1"># SOFTWARE TO OPERATE WITH ANY OTHER SOFTWARE), EVEN IF SUCH HOLDER OR OTHER  #</span>
+</span><span class='line'><span class="c1"># PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.                  #</span>
+</span><span class='line'><span class="c1">###############################################################################</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Import required modules</span>
+</span><span class='line'><span class="k">use</span> <span class="n">strict</span><span class="p">;</span>
+</span><span class='line'><span class="k">use</span> <span class="nn">PostScript::</span><span class="n">MailLabels</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Declare local variables</span>
+</span><span class='line'><span class="k">my</span> <span class="nv">$labels</span><span class="p">;</span>
+</span><span class='line'><span class="k">my</span> <span class="nv">@addresses</span><span class="p">;</span>
+</span><span class='line'><span class="k">my</span> <span class="nv">$filename</span><span class="p">;</span>
+</span><span class='line'><span class="k">my</span> <span class="nv">$filepath</span> <span class="o">=</span> <span class="s">&#39;/home/user1/&#39;</span><span class="p">;</span>
+</span><span class='line'><span class="k">my</span> <span class="nv">$date</span> <span class="o">=</span> <span class="sb">`date +%m%d%y`</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Get name of file from user</span>
+</span><span class='line'><span class="k">print</span> <span class="s">&quot;Enter name of file you would like to process:  &quot;</span><span class="p">;</span>
+</span><span class='line'><span class="nv">$filename</span> <span class="o">=</span> <span class="o">&lt;&gt;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Inform user of progress</span>
+</span><span class='line'><span class="k">print</span> <span class="s">&quot;Creating postscript file ...\n\n&quot;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="nv">$labels</span> <span class="o">=</span> <span class="nn">PostScript::</span><span class="n">MailLabels</span><span class="o">-&gt;</span><span class="k">new</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Create file handle for reading</span>
+</span><span class='line'><span class="nb">open</span><span class="p">(</span><span class="n">NEWADDRESSES</span><span class="p">,</span> <span class="s">&quot;$filepath$filename&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">die</span><span class="p">(</span><span class="s">&quot;Unable to open file: $!&quot;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Read file one line at a time</span>
+</span><span class='line'><span class="k">while</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">#delete first line containing name;street1;street2;citystzip$</span>
+</span><span class='line'>    <span class="k">next</span> <span class="k">if</span> <span class="sr">/^name;/</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nv">$labels</span><span class="o">-&gt;</span><span class="n">labelsetup</span><span class="p">(</span>
+</span><span class='line'>        <span class="n">Avery</span>       <span class="o">=&gt;</span> <span class="nv">$labels</span><span class="o">-&gt;</span><span class="n">averycode</span><span class="p">(</span><span class="mi">5961</span><span class="p">),</span>
+</span><span class='line'>        <span class="n">PaperSize</span>   <span class="o">=&gt;</span> <span class="s">&#39;letter&#39;</span><span class="p">,</span>
+</span><span class='line'>        <span class="n">postnet</span>     <span class="o">=&gt;</span> <span class="s">&#39;no&#39;</span>
+</span><span class='line'>    <span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nv">$labels</span><span class="o">-&gt;</span><span class="n">definelabel</span><span class="p">(</span><span class="s">&#39;clear&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nv">$labels</span><span class="o">-&gt;</span><span class="n">definelabel</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="s">&#39;fname&#39;</span><span class="p">,</span><span class="s">&#39;lname&#39;</span><span class="p">);</span>
+</span><span class='line'>    <span class="nv">$labels</span><span class="o">-&gt;</span><span class="n">definelabel</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="s">&#39;street&#39;</span><span class="p">);</span>
+</span><span class='line'>    <span class="nv">$labels</span><span class="o">-&gt;</span><span class="n">definelabel</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="s">&#39;city&#39;</span><span class="p">,</span><span class="s">&#39;state&#39;</span><span class="p">,</span><span class="s">&#39;zip&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1"># Match lastname, firstname, and address.</span>
+</span><span class='line'>    <span class="k">my</span> <span class="nv">$pattern</span> <span class="o">=</span> <span class="s">&#39;^(.+),\s+(.+);(.+);(.*);(.+),\s+(\w{2})\s+(\d{5}|\d{5}-\d{4})&#39;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nv">$_</span> <span class="o">=~</span><span class="sr"> /$pattern/</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">my</span> <span class="nv">$lname</span> <span class="o">=</span> <span class="nv">$1</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">my</span> <span class="nv">$fname</span> <span class="o">=</span> <span class="nv">$2</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">my</span> <span class="nv">$address1</span> <span class="o">=</span> <span class="nv">$3</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">my</span> <span class="nv">$address2</span> <span class="o">=</span> <span class="nv">$4</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">my</span> <span class="nv">$city</span> <span class="o">=</span> <span class="nv">$5</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">my</span> <span class="nv">$state</span> <span class="o">=</span> <span class="nv">$6</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">my</span> <span class="nv">$zip</span> <span class="o">=</span> <span class="nv">$7</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">my</span> <span class="nv">@record</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nb">push</span> <span class="nv">@record</span><span class="p">,</span> <span class="nv">$fname</span><span class="p">;</span>
+</span><span class='line'>    <span class="nb">push</span> <span class="nv">@record</span><span class="p">,</span> <span class="nv">$lname</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">if</span> <span class="p">(</span> <span class="nv">$address2</span> <span class="o">!~</span> <span class="sr">/^$/</span> <span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nb">push</span> <span class="nv">@record</span><span class="p">,</span> <span class="s">&quot;$address1, $address2&quot;</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nb">push</span> <span class="nv">@record</span><span class="p">,</span> <span class="nv">$address1</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="nb">push</span> <span class="nv">@record</span><span class="p">,</span> <span class="s">&quot;$city,&quot;</span><span class="p">;</span>
+</span><span class='line'>    <span class="nb">push</span> <span class="nv">@record</span><span class="p">,</span> <span class="nv">$state</span><span class="p">;</span>
+</span><span class='line'>    <span class="nb">push</span> <span class="nv">@record</span><span class="p">,</span> <span class="nv">$zip</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1"># Uncomment line below to debug.</span>
+</span><span class='line'>    <span class="c1">#print $labels-&gt;makelabels( $addresses );</span>
+</span><span class='line'>    <span class="nb">push</span> <span class="p">(</span><span class="nv">@addresses</span><span class="p">,</span> <span class="o">\</span><span class="nv">@record</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Close while loop</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Open file handle for writing</span>
+</span><span class='line'><span class="nb">open</span><span class="p">(</span><span class="n">PRINTADDRESSES</span><span class="p">,</span> <span class="s">&quot;&gt;$filepath$date&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">die</span><span class="p">(</span><span class="s">&quot;Unable to write file: $!&quot;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Write postscript file</span>
+</span><span class='line'><span class="k">print</span> <span class="n">PRINTADDRESSES</span> <span class="nv">$labels</span><span class="o">-&gt;</span><span class="n">makelabels</span><span class="p">(</span> <span class="o">\</span><span class="nv">@addresses</span> <span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Close filehandle</span>
+</span><span class='line'><span class="nb">close</span><span class="p">(</span><span class="n">PRINTADDRESSES</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Close filehandle</span>
+</span><span class='line'><span class="nb">close</span><span class="p">(</span><span class="n">NEWADDRESSES</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Notify user of file completion and get printer name</span>
+</span><span class='line'><span class="k">print</span> <span class="s">&quot;Postscript file named $date has been created successfully.\n&quot;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Exit cleanly</span>
+</span><span class='line'><span class="nb">exit</span> <span class="mi">0</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The Perl script basically asks the user what&#8217;s the name of the file they want to print, reads in the file (; delimited in this case), &amp; outputs a postscript file.</p>
+
+<p>Obviously you will have to make some changes in order to get these scripts to work in YOUR environment!</p>
+
+<p><strong>Note:</strong> This is for Avery labels with Avery code 5961.  Please review  PostScript::MailLabels&#8217;s documentation on CPAN to see if the module supports your particular labels or not.  You will also probably have to tweak the  &#8220;labelsetup&#8221; and &#8220;definelabel&#8221; parts to fit your needs.  Also note that the file this script reads is in the format of name;strete1;street2;city;st;zip$ semicolon delimited with a trailing $.  You will have to tweak the regex if your file is in a differet format.</p>
+
+<p><strong>Disclaimer:  This blog entry comes with NO expressed warranty, guarantee, support, or maintenance of any kind!  Use at your own risk!</strong></p>
+
+<p>Good luck and happy printing!</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Gerald L. Hevener Jr. M.S.</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-01-18T23:41:00-05:00" pubdate data-updated="true">Jan 18<span>th</span>, 2013</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://jackl0phty.org/blog/blog/2013/01/18/using-perl-to-print-avery-labels/" data-via="jackl0phty" data-counturl="http://jackl0phty.org/blog/blog/2013/01/18/using-perl-to-print-avery-labels/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/blog/2013/01/18/how-to-recover-the-password-for-the-cisco-asa-5505-adaptive-security-appliance/" title="Previous Post: How to Recover the Password for the Cisco ASA 5505 Adaptive Security Appliance">&laquo; How to Recover the Password for the Cisco ASA 5505 Adaptive Security Appliance</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/blog/2013/05/23/howto-upgrade-from-debian-squeeze-to-wheezy/" title="Next Post: Howto: Upgrade from Debian squeeze to wheezy">Howto: Upgrade from Debian squeeze to wheezy &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/blog/2013/05/24/deploy-a-caching-bind9-chrooted-dns-server-with-opscode-chef/">Deploy a caching Bind9 CHROOTed DNS server with Opscode Chef</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/blog/2013/05/23/howto-upgrade-from-debian-squeeze-to-wheezy/">Howto: Upgrade from Debian squeeze to wheezy</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/blog/2013/01/18/using-perl-to-print-avery-labels/">Using Perl to Print Avery Labels</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/blog/2013/01/18/how-to-recover-the-password-for-the-cisco-asa-5505-adaptive-security-appliance/">How to Recover the Password for the Cisco ASA 5505 Adaptive Security Appliance</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/blog/2013/01/18/using-perl-to-execute-remote-commands/">Using Perl to Execute Remote Commands</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/jackl0phty">@jackl0phty</a> on GitHub
+  
+  <br /> <br />
+  <a href="https://github.com/jackl0phty/opschef-cookbook-avahi-daemon">opschef-cookbook-avahi-daemon</a>
+  <br />
+  <a href="https://github.com/jackl0phty/opschef-cookbook-unix-shells">opschef-cookbook-unix-shells</a>
+  <br />
+  <a href="https://github.com/jackl0phty/opschef-cookbook-sptoolkit">opschef-cookbook-sptoolkit</a>
+  <br />
+  <a href="https://github.com/jackl0phty/opschef-cookbook-linux-gamer">opschef-cookbook-linux-gamer</a>
+  <br />
+  <a href="https://github.com/jackl0phty/opschef-cookbook-linux-dev-env">opschef-cookbook-linux-dev-env</a>
+  <br />
+  <a href="https://github.com/jackl0phty/opschef-cookbook-fog">opschef-cookbook-fog</a>
+  <br />
+  <a href="https://github.com/jackl0phty/opschef-cookbook-bind-chroot">opschef-cookbook-bind-chroot</a>
+  <br />
+  <a href="https://github.com/jackl0phty/opschef-cookbook-pvpgn">opschef-cookbook-pvpgn</a>
+  <br />
+  <a href="https://github.com/jackl0phty/opschef-cookbook-openvas">opschef-cookbook-openvas</a>
+  <br />
+  <a href="https://github.com/jackl0phty/opschef-cookbook-ldapknife">opschef-cookbook-ldapknife</a>
+  <br />
+  <a href="https://github.com/jackl0phty/opschef-cookbook-rackspaceknife">opschef-cookbook-rackspaceknife</a>
+  <br />
+  <a href="https://github.com/jackl0phty/snmp-rndc-stat">snmp-rndc-stats</a>
+
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'jackl0phty',
+            count: 15,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/blog/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating...</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("jackl0phty", 5, true);
+    });
+  </script>
+  <script src="/blog/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/jackl0phty" class="twitter-follow-button" data-show-count="true">Follow @jackl0phty</a>
+  
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p><center>
+  Copyright &copy; 2013 - Gerald L. Hevener Jr., M.S. Jackl0phty LLC
+  <br>
+  <!-- <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span> -->
+  Powered by <a href="http://octopress.org">Octopress</a>, <a href="http://kernel.org">Linux</a>, <a href="http://debian.org">Debian</a>, <a href="http://www.ruby-lang.org/en/">Ruby</a>, <a href="http://www.mongodb.org/">MongoDB</a>, <a href="http://www.perl.org">Perl</a>, <a href="http://www.rackspace.com/cloud/files">Rackspace Cloud Files</a>
+  </center></p>  
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'jackl0phty';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://jackl0phty.org/blog/blog/2013/01/18/using-perl-to-print-avery-labels/';
+        var disqus_url = 'http://jackl0phty.org/blog/blog/2013/01/18/using-perl-to-print-avery-labels/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
